@@ -1,4 +1,5 @@
 import json
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from typing import Tuple
 
@@ -62,7 +63,6 @@ class LossTimeResult:
         return to_json(self)
 
 
-
 def calculate_loss_times(
     t_max: float,
     amplitude: float,
@@ -77,9 +77,17 @@ def calculate_loss_times(
 
     initial_states = generate_random_pairs(n_particles, 0, 2 * np.pi, *p_init_range)
 
-    loss_times = np.array(
-        [tws.get_loss_time(s, p_max=p_max, t_max=t_max) for s in initial_states]
-    )
+    with ThreadPoolExecutor() as executor:
+        loss_times = np.array(
+            list(
+                executor.map(
+                    tws.get_loss_time,
+                    initial_states,
+                    [p_max] * n_particles,
+                    [t_max] * n_particles,
+                )
+            )
+        )
 
     options = dict(
         t_max=t_max,
