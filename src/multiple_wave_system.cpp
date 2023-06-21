@@ -1,5 +1,6 @@
 #include "multiple_wave_system.hpp"
 #include <boost/math/constants/constants.hpp>
+#include <boost/numeric/odeint/stepper/generation/make_controlled.hpp>
 #include <cmath>
 #include <iostream>
 #include "helper_collections.hpp"
@@ -63,6 +64,39 @@ OrbitPoints ThreeWaveSystem::poincare(const State &s, double t_max) const noexce
 
   integrate_const(stepper, *this, s_cur, 0.0, t_max, 1., PushBackStateObesrver(out));
   return out;
+}
+
+double ThreeWaveSystem::get_loss_time(const State &s_init, double p_max, double t_max) const noexcept {
+
+  using namespace boost::numeric::odeint;
+
+  typedef boost::numeric::odeint::runge_kutta_dopri5<State> stepper_type;
+  const double atol = 1.0e-10;
+  const double rtol = 1.0e-10;
+  const double dt_init = 1.0e-3;
+
+  if (s_init[1] > p_max) {
+    return 0.0;
+  }
+
+  // use controlled output stepper
+  // use boost adaptive step time iterators
+  //
+  auto stepper = make_controlled(atol, rtol, stepper_type());
+
+  State s_cur = s_init;
+
+  const auto begin = make_adaptive_time_iterator_begin(stepper, *this, s_cur, 0.0, t_max, dt_init);
+  const auto end = make_adaptive_time_iterator_end(stepper, *this, s_cur);
+
+  for (auto it = begin; it != end; ++it) {
+    const auto &s = it->first;
+    const auto &t = it->second;
+    if (s[1] > p_max) {
+      return t;
+    }
+  }
+  return t_max;
 }
 
 } // namespace WP

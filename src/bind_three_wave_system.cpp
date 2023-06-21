@@ -11,6 +11,8 @@ void bind_three_wave_system(py::module_ &m) {
       .def(py::init<double>(), py::arg("epsilon"))
       .def("__call__", &ThreeWaveSystem::call, py::arg("s"), py::arg("t"))
       .def("repeat_state", &ThreeWaveSystem::repeat_state, py::arg("s"))
-      .def("poincare", &ThreeWaveSystem::poincare, py::arg("s"), py::arg("t_max"))
-  ;
+      .def("poincare", &ThreeWaveSystem::poincare, py::arg("s"),
+           py::arg("t_max"))
+      .def("get_loss_time", &ThreeWaveSystem::get_loss_time, py::arg("s_init"),
+           py::arg("p_max"), py::arg("t_max"));
 }
