@@ -2,6 +2,7 @@ import json
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import asdict, dataclass
 from typing import Tuple
+from itertools import repeat
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -92,9 +93,9 @@ def calculate_loss_times(
                 executor.map(
                     _calculate_loss_time_for_state,
                     initial_states,
-                    [p_max] * n_particles,
-                    [t_max] * n_particles,
-                    [amplitude] * n_particles,
+                    repeat(p_max, n_particles),
+                    repeat(t_max, n_particles),
+                    repeat(amplitude, n_particles),
                 )
             )
         )
