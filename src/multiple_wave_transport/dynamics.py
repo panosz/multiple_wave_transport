@@ -111,11 +111,10 @@ def calculate_loss_times(
     return LossTimeResult(initial_states, loss_times, options)
 
 
-def generate_poincare_plot(amplitude: float):
+def generate_poincare_plot(ax, amplitude: float):
     tws = ThreeWaveSystem(amplitude)
-    fig, ax = plt.subplots(1, 1)
     for p_init in np.linspace(1, 30, 50):
         pc = tws.poincare([0, p_init], 1000)
         ax.plot(angle_to_2pi(pc[0]), pc[1], "k,")  # type: ignore
 
-    return fig, ax
+    return ax

@@ -88,19 +88,32 @@ ax.plot(actual_p_init_v, actual_loss_times, "k.")  # type: ignore
 times, current = calculate_current(
     actual_loss_times[actual_loss_times < 100], bins=5000
 )
-fig, (ax, ax_freq) = plt.subplots(2, 1)
-ax.plot(times, current)
-axins = ax.inset_axes([0.5, 0.5, 0.47, 0.47])
+fig = plt.figure(figsize=(15, 6), constrained_layout=True)
+gs = fig.add_gridspec(2, 2)
+
+ax_poincare = fig.add_subplot(gs[:, 0])
+ax_current = fig.add_subplot(gs[0, 1])
+ax_spectrum = fig.add_subplot(gs[1, 1])
+
+
+ax_current.plot(times, current)
+axins = ax_current.inset_axes([0.5, 0.5, 0.47, 0.47])
 mask = np.logical_and(times > 20, times < 30)
 axins.plot(times[mask], current[mask])
-ax.indicate_inset_zoom(axins, edgecolor="black")
+ax_current.indicate_inset_zoom(axins, edgecolor="black")
+ax_current.set_ylabel("current (particles/s)")
+ax_current.set_xlabel("time (s)")
 #  ax.plot(times, uniform_filter1d(current, size=5))
 
 frequencies, spectrum = get_spectrum(current, times)
-ax_freq.plot(frequencies, spectrum / spectrum.max())
-ax_freq.set_xlim(-0.1, 8)
+ax_spectrum.plot(frequencies, spectrum / spectrum.max())
+ax_spectrum.set_xlim(-0.1, 8)
+ax_spectrum.set_xlabel("frequency (Hz)")
+ax_spectrum.set_ylabel("spectrum (a.u.)")
 
-fig, ax = generate_poincare_plot(options["amplitude"])
-ax.hlines(result.options["p_max"], 0, 2 * np.pi, color="r", linestyle="--")
+generate_poincare_plot(ax_poincare, options["amplitude"])
+ax_poincare.hlines(result.options["p_max"], 0, 2 * np.pi, color="r", linestyle="--")
+ax_poincare.set_xlabel("$x$")
+ax_poincare.set_ylabel("$p$")
 
 plt.show()

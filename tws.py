@@ -48,7 +48,8 @@ frequencies = np.fft.fftfreq(len(hist), dt)
 mask = frequencies >= 0
 ax_freq.plot(frequencies[mask], np.abs(Y[mask]))
 
-fig, ax = generate_poincare_plot(options["amplitude"])
+fig, ax = plt.subplots(1, 1)
+generate_poincare_plot(ax, options["amplitude"])
 
 print(to_json(options))
 plt.show()
