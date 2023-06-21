@@ -113,8 +113,8 @@ def calculate_loss_times(
 def generate_poincare_plot(amplitude: float):
     tws = ThreeWaveSystem(amplitude)
     fig, ax = plt.subplots(1, 1)
-    for p_init in np.linspace(1, 30, 20):
-        pc = tws.poincare([0, p_init], 10000)
+    for p_init in np.linspace(1, 30, 50):
+        pc = tws.poincare([0, p_init], 1000)
         ax.plot(angle_to_2pi(pc[0]), pc[1], "k,")  # type: ignore
 
     return fig, ax
