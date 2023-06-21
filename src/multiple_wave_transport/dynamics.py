@@ -36,6 +36,32 @@ class LossTimeResult:
     loss_times: np.ndarray
     options: dict
 
+    @classmethod
+    def from_json(cls, s):
+        """
+        Create a LossTimeResult from a JSON string
+        """
+        d = json.loads(s)
+        d["initial_states"] = [tuple(s) for s in d["initial_states"]]
+        d["loss_times"] = np.array(d["loss_times"])
+
+        return cls(**d)
+
+    @classmethod
+    def from_file(cls, filename):
+        """
+        Create a LossTimeResult from a JSON file
+        """
+        with open(filename, "r") as f:
+            return cls.from_json(f.read())
+
+    def to_json(self):
+        """
+        Convert the result to a JSON string
+        """
+        return to_json(self)
+
+
 
 def calculate_loss_times(
     t_max: float,

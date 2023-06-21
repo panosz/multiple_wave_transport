@@ -1,29 +1,12 @@
-import json
-from dataclasses import asdict, dataclass
-from typing import Tuple
-
 import matplotlib.pyplot as plt
 import numpy as np
 
 from multiple_wave_transport.dynamics import (
+    LossTimeResult,
     calculate_loss_times,
     generate_poincare_plot,
     to_json,
 )
-
-
-@dataclass
-class IntegrationOptions:
-    """
-    Options for the integration
-    """
-
-    t_max: float
-    amplitude: float
-    p_init_range: Tuple[float, float]
-    p_max: float
-    n_particles: int
-
 
 options = dict(
     t_max=500.0,
@@ -34,6 +17,13 @@ options = dict(
 )
 
 result = calculate_loss_times(**options)
+
+result2 = LossTimeResult.from_json(to_json(result))
+
+assert np.allclose(result2.loss_times, result.loss_times)
+assert result2.options["t_max"] == options["t_max"]
+
+
 initial_states, loss_times = result.initial_states, result.loss_times
 
 p_init_v = np.array([s[1] for s in initial_states])
