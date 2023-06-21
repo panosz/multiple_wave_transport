@@ -1,5 +1,5 @@
 import json
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ProcessPoolExecutor
 from dataclasses import asdict, dataclass
 from typing import Tuple
 
@@ -63,6 +63,16 @@ class LossTimeResult:
         return to_json(self)
 
 
+def _calculate_loss_time_for_state(
+    state: Tuple[float, float],
+    p_max: float,
+    t_max: float,
+    amplitude: float,
+):
+    tws = ThreeWaveSystem(amplitude)
+    return tws.get_loss_time(state, p_max, t_max)
+
+
 def calculate_loss_times(
     t_max: float,
     amplitude: float,
@@ -73,18 +83,18 @@ def calculate_loss_times(
     """
     Calculate the loss times for a set of initial conditions
     """
-    tws = ThreeWaveSystem(amplitude)
 
     initial_states = generate_random_pairs(n_particles, 0, 2 * np.pi, *p_init_range)
 
-    with ThreadPoolExecutor() as executor:
+    with ProcessPoolExecutor() as executor:
         loss_times = np.array(
             list(
                 executor.map(
-                    tws.get_loss_time,
+                    _calculate_loss_time_for_state,
                     initial_states,
                     [p_max] * n_particles,
                     [t_max] * n_particles,
+                    [amplitude] * n_particles,
                 )
             )
         )
