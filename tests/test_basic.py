@@ -1,53 +1,47 @@
 import numpy as np
 import numpy.testing as nt
-import multiple_wave_transport 
+
+import multiple_wave_transport
+from multiple_wave_transport.math import angle_to_2pi, generate_random_pairs
 
 
 def test_version():
     assert multiple_wave_transport.__version__ == "0.0.1"
 
-def test_Wavepacket():
-    w = multiple_wave_transport.WavePacket(1,2,3,4)
-    nt.assert_allclose(w(0,0), 0, atol=1e-16)
-    nt.assert_allclose(w(t=0,z=0), 0, atol=1e-16)
-    assert w.A == 1
-    assert w.sigma == 2
-    assert w.k == 3
-    assert w.vp == 4
+
+def test_positive_angle():
+    nt.assert_allclose(angle_to_2pi(np.pi), np.pi)
 
 
-def test_Wavepacket_construct_kwargs():
-    kw = dict(A=1, sigma=2, k=3, vp=4) 
-    w = multiple_wave_transport.WavePacket(**kw)
-
-def test_Wavepacket_vector_call():
-    w = multiple_wave_transport.WavePacket(1,2,3,4)
-    z = np.array([1,2])
-    t = np.array([0.2, 3.8])
-
-    vector_result = w(z, t)
-
-    scalar_result = [w(zi, ti) for zi, ti in zip(z,t)]
-
-    nt.assert_allclose(vector_result, scalar_result, atol=1e-16, rtol=1e-16)
+def test_negative_angle():
+    nt.assert_allclose(angle_to_2pi(-np.pi), np.pi)
 
 
-def test_Wavepacket_vector_dz_call():
-    w = multiple_wave_transport.WavePacket(1,2,3,4)
-    z = np.array([1,2])
-    t = np.array([0.2, 3.8])
-
-    vector_result = w.dz(z, t)
-
-    scalar_result = [w.dz(zi, ti) for zi, ti in zip(z,t)]
-
-    nt.assert_allclose(vector_result, scalar_result, atol=1e-16, rtol=1e-16)
+def test_angle_over_2pi():
+    nt.assert_allclose(angle_to_2pi(3 * np.pi), np.pi)
 
 
-def test_Wavepacket_system_call():
-    w = multiple_wave_transport.WavePacket(1,2,3,4)
-    w.system([1,2], 3)
+def test_zero_angle():
+    nt.assert_allclose(angle_to_2pi(0), 0)
 
-def test_Wavepacket_repr():
-    w = multiple_wave_transport.WavePacket(1,2,3,4)
-    assert "A=1" in str(w)
+
+def test_multiple_2pi():
+    for i in range(-10, 10):
+        nt.assert_allclose(angle_to_2pi(i * 2 * np.pi), 0)
+
+
+def test_generate_pairs_count():
+    pairs = generate_random_pairs(10, 0, 1, 0, 1)
+    assert len(pairs) == 10
+
+
+def test_generate_pairs_ranges():
+    pairs = generate_random_pairs(10, 1, 2, 3, 4)
+    for x, y in pairs:
+        assert 1 <= x <= 2
+        assert 3 <= y <= 4
+
+
+def test_generate_pairs_empty():
+    pairs = generate_random_pairs(0, 0, 1, 0, 1)
+    assert len(pairs) == 0
