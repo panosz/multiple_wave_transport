@@ -1,8 +1,8 @@
 import json
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import asdict, dataclass
-from typing import Tuple
 from itertools import repeat
+from typing import Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -87,18 +87,12 @@ def calculate_loss_times(
 
     initial_states = generate_random_pairs(n_particles, 0, 2 * np.pi, *p_init_range)
 
-    with ProcessPoolExecutor() as executor:
-        loss_times = np.array(
-            list(
-                executor.map(
-                    _calculate_loss_time_for_state,
-                    initial_states,
-                    repeat(p_max, n_particles),
-                    repeat(t_max, n_particles),
-                    repeat(amplitude, n_particles),
-                )
-            )
-        )
+    loss_times = np.array(
+        [
+            _calculate_loss_time_for_state(s, p_max, t_max, amplitude)
+            for s in initial_states
+        ]
+    )
 
     options = dict(
         t_max=t_max,
@@ -113,8 +107,9 @@ def calculate_loss_times(
 
 def generate_poincare_plot(ax, amplitude: float):
     tws = ThreeWaveSystem(amplitude)
-    for p_init in np.linspace(1, 30, 50):
-        pc = tws.poincare([0, p_init], 1000)
-        ax.plot(angle_to_2pi(pc[0]), pc[1], "k,")  # type: ignore
+    s_init_vect = generate_random_pairs(100, 0, 2 * np.pi, 3, 24)
+    for s in s_init_vect:
+        pc = tws.poincare(s, 3000)
+        ax.plot(angle_to_2pi(pc[0]), pc[1], "k,", alpha=0.5)  # type: ignore
 
     return ax
