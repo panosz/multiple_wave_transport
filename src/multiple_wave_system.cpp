@@ -66,6 +66,31 @@ OrbitPoints ThreeWaveSystem::poincare(const State &s, double t_max) const noexce
   return out;
 }
 
+template<typename DenseStepper>
+double track_down_cross_time(DenseStepper &stepper, double p_max) {
+  // improve accuracy of the crossing time by bisection method
+  // It is assumed that the event is detected at the last step taken by the stepper
+
+  double t2 = stepper.current_time();
+  double dt = stepper.current_time_step();
+  double t1 = t2 - dt;
+
+  double t = (t1 + t2) / 2;  // start with the midpoint
+  State x;
+
+  while (t2 - t1 > 1e-5) {  // until the precision is high enough
+    stepper.calc_state(t, x);  // interpolate the state at time t
+    if (x[1] > p_max) {
+      t2 = t;  // if the event is detected, the time is too late
+    } else {
+      t1 = t;  // if no event is detected, the time is too early
+    }
+    t = (t1 + t2) / 2;  // update the time
+    }
+  return t;
+}
+
+
 double ThreeWaveSystem::get_loss_time(const State &s_init, double p_max, double t_max) const noexcept {
 
   using namespace boost::numeric::odeint;
@@ -79,21 +104,18 @@ double ThreeWaveSystem::get_loss_time(const State &s_init, double p_max, double 
     return 0.0;
   }
 
-  // use controlled output stepper
-  // use boost adaptive step time iterators
   //
-  auto stepper = make_controlled(atol, rtol, stepper_type());
+  auto stepper = make_dense_output(atol, rtol, stepper_type());
 
   State s_cur = s_init;
 
-  const auto begin = make_adaptive_time_iterator_begin(stepper, *this, s_cur, 0.0, t_max, dt_init);
-  const auto end = make_adaptive_time_iterator_end(stepper, *this, s_cur);
+  const auto begin = make_adaptive_time_iterator_begin(std::ref(stepper), *this, s_cur, 0.0, t_max, dt_init);
+  const auto end = make_adaptive_time_iterator_end(std::ref(stepper), *this, s_cur);
 
   for (auto it = begin; it != end; ++it) {
     const auto &s = it->first;
-    const auto &t = it->second;
     if (s[1] > p_max) {
-      return t;
+      return track_down_cross_time(stepper, p_max);
     }
   }
   return t_max;
