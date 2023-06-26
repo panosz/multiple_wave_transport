@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Tuple
 
-from multiple_wave_transport.dynamics import calculate_loss_times
+from multiple_wave_transport.three_wave import calculate_loss_times
 
 THIS_FOLDER = Path(__file__).parent
 DATA_FOLDER = THIS_FOLDER / "data"
@@ -26,15 +26,19 @@ def calculate_and_save_loss_times(
         f.write(result.to_json())
 
 
+opts = dict(
+    t_max=400.0,
+    p_init_range=(6.0, 17.0),
+    p_max=20,
+    n_particles=200_000,
+)
+
 if __name__ == "__main__":
-    amplitudes = [0.8, 1.2]
-    t_max = 400.0
-    p_init_range = (6.0, 17.0)
-    p_max = 20
-    n_particles = 200_000
+    amplitudes = [
+        17.8,
+        24.3,
+    ]
 
     for amplitude in amplitudes:
         filename = f"loss_times_{amplitude:.1f}.json"
-        calculate_and_save_loss_times(
-            filename, t_max, amplitude, p_init_range, p_max, n_particles
-        )
+        calculate_and_save_loss_times(filename, amplitude=amplitude, **opts)

@@ -3,7 +3,7 @@ import numpy as np
 
 from multiple_wave_transport.losses import LossTimeResult, to_json
 
-from multiple_wave_transport.dynamics import (
+from multiple_wave_transport.three_wave import (
     calculate_loss_times,
     generate_poincare_plot,
 )
