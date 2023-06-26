@@ -30,6 +30,7 @@ pybind11_add_module(_multiple_wave_transport MODULE
   src/bind_wavepacket.cpp
   src/bind_integrator.cpp
   src/bind_three_wave_system.cpp
+  src/bind_pendulum.cpp
   src/wavepacket.cpp
   src/wavepacket.hpp
   src/type_definitions.hpp
@@ -37,6 +38,8 @@ pybind11_add_module(_multiple_wave_transport MODULE
   src/integrator.cpp
   src/multiple_wave_system.hpp
   src/multiple_wave_system.cpp
+  src/perturbed_pendulum.hpp
+  src/perturbed_pendulum.cpp
   src/helper_collections.hpp
   src/helper_collections.cpp
   )

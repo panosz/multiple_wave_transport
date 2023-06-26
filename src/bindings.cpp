@@ -17,6 +17,7 @@ typedef WP::WavePacket WavePacket;
 void bind_wavepacket(py::module_ &m);
 void bind_integrator(py::module_ &m);
 void bind_three_wave_system(py::module_ &m);
+void bind_pendulum(py::module_ &m);
 
 PYBIND11_MODULE(_multiple_wave_transport, m) {
   m.doc() = R"pbdoc(
@@ -41,5 +42,6 @@ PYBIND11_MODULE(_multiple_wave_transport, m) {
   bind_wavepacket(m);
   bind_integrator(m);
   bind_three_wave_system(m);
+  bind_pendulum(m);
 
 }
