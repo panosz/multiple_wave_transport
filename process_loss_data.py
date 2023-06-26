@@ -5,7 +5,8 @@ import numpy as np
 from scipy.ndimage import uniform_filter1d
 from scipy.optimize import curve_fit
 
-from multiple_wave_transport.dynamics import LossTimeResult, generate_poincare_plot
+from multiple_wave_transport.losses import LossTimeResult
+from multiple_wave_transport.dynamics import generate_poincare_plot
 
 THIS_FOLDER = Path(__file__).parent
 

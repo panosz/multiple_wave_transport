@@ -1,19 +1,19 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from multiple_wave_transport.losses import LossTimeResult, to_json
+
 from multiple_wave_transport.dynamics import (
-    LossTimeResult,
     calculate_loss_times,
     generate_poincare_plot,
-    to_json,
 )
 
 options = dict(
     t_max=500.0,
-    amplitude=3.8,
+    amplitude=7.8,
     p_init_range=(6.0, 17.0),
     p_max=20,
-    n_particles=200,
+    n_particles=20000,
 )
 
 result = calculate_loss_times(**options)

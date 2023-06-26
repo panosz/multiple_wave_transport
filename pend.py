@@ -6,7 +6,7 @@ from multiple_wave_transport._multiple_wave_transport import (
     PerturbedPendulum,
     UnperturbedPendulum,
 )
-from multiple_wave_transport.dynamics import LossTimeResult
+from multiple_wave_transport.losses import LossTimeResult
 from multiple_wave_transport.math import angle_to_2pi, generate_random_pairs
 
 
