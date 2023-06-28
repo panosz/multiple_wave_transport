@@ -6,6 +6,7 @@ from ._multiple_wave_transport import PerturbedPendulum, UnperturbedPendulum
 from .losses import LossTimeResult
 from multiple_wave_transport.math import generate_random_pairs
 from scipy.special import ellipk
+from .math import angle_to_2pi
 
 
 def kappa_sq(s):
@@ -64,3 +65,12 @@ def calculate_loss_times(
         n_particles=n_particles,
     )
     return LossTimeResult(init_trapped_states, loss_times, options)
+
+
+def generate_poincare_plot(ax, amplitude, t_max=2500):
+    pendulum = PerturbedPendulum(amplitude)
+    initial_states = generate_random_pairs(100, 0, 2 * np.pi, -1.5, 1.5)
+    for s in initial_states:
+        pc = pendulum.poincare(s, t_max)
+        ax.plot(angle_to_2pi(pc[0]), pc[1], "k,", alpha=0.5)  # type: ignore
+
