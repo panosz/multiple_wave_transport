@@ -20,7 +20,13 @@ ax.errorbar(df.amplitude, df.alpha, yerr=df.alpha_err, fmt="o", ecolor='r', caps
 ax.set_ylabel(r"$\alpha$")
 ax.set_xlabel("amplitude")
 fig.suptitle("alpha")
-fig.savefig(FIGURE_FOLDER / "estimated_parameters.png")
+fig.savefig(FIGURE_FOLDER / "estimated_alpha.png")
 
+fig, ax = plt.subplots(figsize=(8, 6))
+ax.errorbar(df.amplitude, df.A, yerr=df.A_err, fmt="o", ecolor='r', capsize=5)
+ax.set_ylabel(r"$\alpha$")
+ax.set_xlabel("amplitude")
+fig.suptitle("A")
+fig.savefig(FIGURE_FOLDER / "estimated_A.png")
 
 plt.show()
