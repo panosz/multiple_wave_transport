@@ -96,9 +96,9 @@ def process_and_plot_result(filename):
 
 
 if __name__ == "__main__":
-    filename = THIS_FOLDER / "data" / "loss_times_1.8.json"
+    filename = THIS_FOLDER / "data" / "loss_times_10.3.json"
 
-    _, fig, estimated_parameters = process_and_plot_result(filename)
+    _, estimated_parameters, fig = process_and_plot_result(filename)
 
     print(estimated_parameters)
 
