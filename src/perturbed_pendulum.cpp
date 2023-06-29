@@ -45,21 +45,7 @@ State UnperturbedPendulum::integrate(const State& s , double t) const noexcept {
   return s_cur;
 
 }
-void PerturbedPendulum::operator()(
-    const State &s, State &dsdt, double t) const noexcept {
-  using namespace boost::math::double_constants;
-  const auto &x = s[0];
-  const auto &p = s[1];
 
-  dsdt[0] = p;
-  dsdt[1] = sin(x) - epsilon * cos(5*x - t/2);
-}
-
-State PerturbedPendulum::call(const State &s, double t) const noexcept {
-  State dsdt{2, 3};
-  this->operator()(s, dsdt, t);
-  return dsdt;
-}
 
 class PushBackStateObesrver
 {
@@ -75,9 +61,8 @@ class PushBackStateObesrver
 };
 
 
-
-
-OrbitPoints PerturbedPendulum::poincare(const State &s, double t_max) const noexcept {
+template<typename System>
+OrbitPoints poincare_impl(const System& sys, const State &s, double t_max) noexcept {
   WP::collections::OrbitStdVector out{};
 
   using namespace boost::numeric::odeint;
@@ -91,7 +76,7 @@ OrbitPoints PerturbedPendulum::poincare(const State &s, double t_max) const noex
 
   State s_cur = s;
 
-  integrate_const(stepper, *this, s_cur, 0.0, t_max, 2*two_pi, PushBackStateObesrver(out));
+  integrate_const(stepper, sys, s_cur, 0.0, t_max, 2*two_pi, PushBackStateObesrver(out));
   return out;
 }
 
@@ -140,7 +125,8 @@ auto get_boundary_check_function(WP::BoundaryType boundarytype) {
   }
 }
 
-double PerturbedPendulum::get_loss_time(const State &s_init, double t_max, WP::BoundaryType boundarytype) const noexcept {
+template <typename System>
+double get_loss_time_impl(const System& sys, const State &s_init, double t_max, WP::BoundaryType boundarytype) noexcept {
   auto is_outside = get_boundary_check_function(boundarytype);
 
   using namespace boost::numeric::odeint;
@@ -161,8 +147,8 @@ double PerturbedPendulum::get_loss_time(const State &s_init, double t_max, WP::B
 
   State s_cur = s_init;
 
-  const auto begin = make_adaptive_time_iterator_begin(std::ref(stepper), *this, s_cur, 0.0, t_max, dt_init);
-  const auto end = make_adaptive_time_iterator_end(std::ref(stepper), *this, s_cur);
+  const auto begin = make_adaptive_time_iterator_begin(std::ref(stepper), sys, s_cur, 0.0, t_max, dt_init);
+  const auto end = make_adaptive_time_iterator_end(std::ref(stepper), sys, s_cur);
 
   for (auto it = begin; it != end; ++it) {
     const auto &s = it->first;
@@ -171,6 +157,32 @@ double PerturbedPendulum::get_loss_time(const State &s_init, double t_max, WP::B
     }
   }
   return t_max;
+}
+
+
+void PerturbedPendulum::operator()(
+    const State &s, State &dsdt, double t) const noexcept {
+  using namespace boost::math::double_constants;
+  const auto &x = s[0];
+  const auto &p = s[1];
+
+  dsdt[0] = p;
+  dsdt[1] = sin(x) - epsilon * cos(5*x - t/2);
+}
+
+State PerturbedPendulum::call(const State &s, double t) const noexcept {
+  State dsdt{2, 3};
+  this->operator()(s, dsdt, t);
+  return dsdt;
+}
+
+
+OrbitPoints PerturbedPendulum::poincare(const State &s, double t_max) const noexcept {
+  return poincare_impl(*this, s, t_max);
+}
+
+double PerturbedPendulum::get_loss_time(const State &s_init, double t_max, WP::BoundaryType boundarytype) const noexcept {
+  return get_loss_time_impl(*this, s_init, t_max, boundarytype);
 }
 
 
