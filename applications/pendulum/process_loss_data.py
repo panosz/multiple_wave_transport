@@ -100,7 +100,8 @@ def process_and_plot_result(filename, t_poincare):
     axins.plot(times[mask], averaged_current[mask], color="g", lw=2, alpha=0.8)
     ax_current.indicate_inset_zoom(axins, edgecolor="black")
 
-    frequencies, spectrum = get_spectrum(current, times)
+    mask = times > 200
+    frequencies, spectrum = get_spectrum(current[mask], times[mask])
 
     base_wave_freq = 1 / (4 * np.pi)
     frequencies = frequencies / base_wave_freq
@@ -120,7 +121,7 @@ def process_and_plot_result(filename, t_poincare):
 
 
 if __name__ == "__main__":
-    filename = THIS_FOLDER / "data" / "loss_times_0.45.json"
+    filename = THIS_FOLDER / "data_p_boundary" / "loss_times_2.90.json"
 
     _, estimated_parameters, fig = process_and_plot_result(filename, t_poincare=25000)
 
