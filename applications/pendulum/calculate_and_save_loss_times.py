@@ -1,7 +1,11 @@
 from pathlib import Path
 
-from multiple_wave_transport.pendulum import calculate_loss_times
 from multiple_wave_transport._multiple_wave_transport import BoundaryType
+from multiple_wave_transport.pendulum import (
+    PerturbedPendulum,
+    PerturbedPendulumWithLowFrequency,
+    calculate_loss_times,
+)
 
 THIS_FOLDER = Path(__file__).parent
 DATA_FOLDER = THIS_FOLDER / "data"
@@ -10,19 +14,38 @@ DATA_FOLDER = THIS_FOLDER / "data"
 DATA_FOLDER.mkdir(parents=True, exist_ok=True)
 
 
+def get_filename_w_low_frequency(amplitude):
+    return f"loss_times_{amplitude[0]:.2f}_{amplitude[1]:.2f}.json"
+
+
+def get_filename_without_low_frequency(amplitude):
+    return f"loss_times_{amplitude:.2f}.json"
+
+
+def get_filename(amplitude, pendulumtype):
+    if pendulumtype == PerturbedPendulum:
+        return get_filename_without_low_frequency(amplitude)
+    elif pendulumtype == PerturbedPendulumWithLowFrequency:
+        return get_filename_w_low_frequency(amplitude)
+    else:
+        raise ValueError("Invalid pendulum type")
+
+
 def calculate_and_save_loss_times(
     t_max: float,
-    amplitude: float,
+    amplitude: float | tuple[float, float],
     n_particles: int,
     data_folder: Path | str = DATA_FOLDER,
-    boundary_type: BoundaryType = BoundaryType.X, 
+    boundary_type: BoundaryType = BoundaryType.X,
+    pendulumtype: type[PerturbedPendulum]
+    | type[PerturbedPendulumWithLowFrequency] = PerturbedPendulum,
 ):
     """
     Calculate the loss times and save them to a file
     """
-    print(f"Calculating loss times for amplitude {amplitude:.2f}")
-    result = calculate_loss_times(t_max, amplitude, n_particles, boundary_type)
-    filename = f"loss_times_{amplitude:.2f}.json"
+    print(f"Calculating loss times for amplitude {amplitude}")
+    result = calculate_loss_times(t_max, amplitude, n_particles, boundary_type, pendulumtype)
+    filename = get_filename(amplitude, pendulumtype)
     with open(Path(data_folder) / filename, "w") as f:
         f.write(result.to_json())
 

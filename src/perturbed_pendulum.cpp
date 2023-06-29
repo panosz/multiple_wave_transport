@@ -56,8 +56,10 @@ public:
 };
 
 template <typename System>
-OrbitPoints poincare_impl(const System &sys, const State &s,
-                          double t_max) noexcept {
+OrbitPoints poincare_impl(const System &sys, const State &s, 
+                          double t_max,
+                          double delta_t
+                          ) noexcept {
   WP::collections::OrbitStdVector out{};
 
   using namespace boost::numeric::odeint;
@@ -71,7 +73,7 @@ OrbitPoints poincare_impl(const System &sys, const State &s,
 
   State s_cur = s;
 
-  integrate_const(stepper, sys, s_cur, 0.0, t_max, 2 * two_pi,
+  integrate_const(stepper, sys, s_cur, 0.0, t_max, delta_t,
                   PushBackStateObesrver(out));
   return out;
 }
@@ -175,11 +177,48 @@ State PerturbedPendulum::call(const State &s, double t) const noexcept {
 
 OrbitPoints PerturbedPendulum::poincare(const State &s,
                                         double t_max) const noexcept {
-  return poincare_impl(*this, s, t_max);
+
+  using namespace boost::math::double_constants;
+  constexpr double delta_t = 2 * two_pi;
+
+  return poincare_impl(*this, s, t_max, delta_t);
 }
 
 double
 PerturbedPendulum::get_loss_time(const State &s_init, double t_max,
+                                 WP::BoundaryType boundarytype) const noexcept {
+  return get_loss_time_impl(*this, s_init, t_max, boundarytype);
+}
+
+
+void PerturbedPendulumWithLowFrequency::operator()(const State &s, State &dsdt,
+                                   double t) const noexcept {
+  using namespace boost::math::double_constants;
+  const auto &x = s[0];
+  const auto &p = s[1];
+
+  constexpr double low_omega = 0.05;
+
+  dsdt[0] = p;
+  dsdt[1] = sin(x) - epsilon_high * cos(5 * x - t / 2) - epsilon_low * cos(x - t * low_omega);
+}
+
+State PerturbedPendulumWithLowFrequency::call(const State &s, double t) const noexcept {
+  State dsdt{2, 3};
+  this->operator()(s, dsdt, t);
+  return dsdt;
+}
+
+OrbitPoints PerturbedPendulumWithLowFrequency::poincare(const State &s,
+                                        double t_max) const noexcept {
+
+  using namespace boost::math::double_constants;
+  constexpr double delta_t = 20 * two_pi;
+  return poincare_impl(*this, s, t_max, delta_t);
+}
+
+double
+PerturbedPendulumWithLowFrequency::get_loss_time(const State &s_init, double t_max,
                                  WP::BoundaryType boundarytype) const noexcept {
   return get_loss_time_impl(*this, s_init, t_max, boundarytype);
 }

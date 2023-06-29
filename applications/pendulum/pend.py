@@ -1,17 +1,21 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from multiple_wave_transport.pendulum import calculate_loss_times
-from multiple_wave_transport.math import generate_random_pairs, angle_to_2pi
-from multiple_wave_transport._multiple_wave_transport import PerturbedPendulum
-from multiple_wave_transport.pendulum import generate_poincare_plot
-
-
+from multiple_wave_transport._multiple_wave_transport import (
+    PerturbedPendulum,
+    PerturbedPendulumWithLowFrequency,
+    UnperturbedPendulum,
+)
+from multiple_wave_transport.math import angle_to_2pi, generate_random_pairs
+from multiple_wave_transport.pendulum import (
+    calculate_loss_times,
+    generate_poincare_plot,
+)
 
 if __name__ == "__main__":
     options = dict(
-        t_max=15000,
-        amplitude=0.4,
+        t_max=150000,
+        amplitude=(0.4, 0.1),
         n_particles=10000,
     )
 
@@ -37,8 +41,12 @@ if __name__ == "__main__":
     #  ax_freq.plot(frequencies[mask] / base_wave_freq, np.abs(Y[mask]))
     #  ax_freq.set_xlabel("Frequency (base wave frequency)")
 
-
     fig, ax = plt.subplots()
-    generate_poincare_plot(ax, amplitude=options["amplitude"], t_max=options["t_max"])
+    generate_poincare_plot(
+        ax,
+        amplitude=options["amplitude"],
+        t_max=options["t_max"],
+        pendulumtype=PerturbedPendulumWithLowFrequency,
+    )
 
     plt.show()

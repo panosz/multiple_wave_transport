@@ -11,7 +11,11 @@ from multiple_wave_transport.losses import (
     filter_loss_times,
     get_spectrum,
 )
-from multiple_wave_transport.pendulum import generate_poincare_plot
+from multiple_wave_transport.pendulum import (
+    PerturbedPendulum,
+    PerturbedPendulumWithLowFrequency,
+    generate_poincare_plot,
+)
 
 THIS_FOLDER = Path(__file__).parent
 
@@ -36,7 +40,7 @@ def fit_exp_decay(times, current, guess):
     return popt, errors
 
 
-def process_and_plot_result(filename, t_poincare):
+def process_and_plot_result(filename, t_poincare, pendulumtype=PerturbedPendulum):
     """
     Process the result of a loss time calculation and plot the results
     """
@@ -111,19 +115,19 @@ def process_and_plot_result(filename, t_poincare):
     ax_spectrum.set_xlabel("frequency (f/f0)")
     ax_spectrum.set_ylabel("spectrum (a.u.)")
 
-    generate_poincare_plot(ax_poincare, options["amplitude"], t_max=t_poincare)
+    generate_poincare_plot(ax_poincare, options["amplitude"], t_max=t_poincare, pendulumtype=pendulumtype)
     ax_poincare.set_xlim(0, 2 * np.pi)
     ax_poincare.set_ylim(-2.5, 2.5)
     ax_poincare.set_xlabel("$x$")
     ax_poincare.set_ylabel("$p$")
-    fig.suptitle(f"amplitude: {options['amplitude']:.2f}")
+    fig.suptitle(f"amplitude: {options['amplitude']}")
     return result, estimated_parameters, fig
 
 
 if __name__ == "__main__":
-    filename = THIS_FOLDER / "data_p_boundary" / "loss_times_2.90.json"
+    filename = THIS_FOLDER / "data_w_low_freq" / "loss_times_0.50_0.10.json"
 
-    _, estimated_parameters, fig = process_and_plot_result(filename, t_poincare=25000)
+    _, estimated_parameters, fig = process_and_plot_result(filename, t_poincare=25000, pendulumtype=PerturbedPendulumWithLowFrequency)
 
     print(estimated_parameters)
 

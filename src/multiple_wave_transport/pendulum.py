@@ -1,12 +1,19 @@
 """
 this module contains functionality for studying the pendulum dynamics
 """
-import numpy as np
-from ._multiple_wave_transport import PerturbedPendulum, UnperturbedPendulum, BoundaryType
+from .math import angle_to_2pi
 from .losses import LossTimeResult
 from multiple_wave_transport.math import generate_random_pairs
 from scipy.special import ellipk
-from .math import angle_to_2pi
+import numpy as np
+
+from ._multiple_wave_transport import (
+    BoundaryType,
+    PerturbedPendulum,
+    UnperturbedPendulum,
+    PerturbedPendulumWithLowFrequency
+)
+
 
 
 def kappa_sq(s):
@@ -47,18 +54,30 @@ def generate_random_init_trapped_states(n):
     return trapped_states
 
 
+def build_pendulum(amplitude, pendulumtype):
+    if pendulumtype == PerturbedPendulum:
+        return PerturbedPendulum(amplitude)
+    elif pendulumtype == PerturbedPendulumWithLowFrequency:
+        return PerturbedPendulumWithLowFrequency(amplitude[0], amplitude[1])
+    else:
+        raise ValueError("Invalid pendulum type")
+
+
 def calculate_loss_times(
     t_max: float,
     amplitude: float,
     n_particles: int,
     boundary_type: BoundaryType = BoundaryType.X,
+    pendulumtype=PerturbedPendulum,
 ):
     """
     Calculate the loss times for a set of initial conditions
     """
-    pert = PerturbedPendulum(amplitude)
+    pend = build_pendulum(amplitude, pendulumtype)
     init_trapped_states = generate_random_init_trapped_states(n_particles)
-    loss_times = np.array([pert.get_loss_time(s, t_max, boundary_type) for s in init_trapped_states])
+    loss_times = np.array(
+        [pend.get_loss_time(s, t_max, boundary_type) for s in init_trapped_states]
+    )
 
     options = dict(
         t_max=t_max,
@@ -68,10 +87,13 @@ def calculate_loss_times(
     return LossTimeResult(init_trapped_states, loss_times, options)
 
 
-def generate_poincare_plot(ax, amplitude, t_max=2500):
-    pendulum = PerturbedPendulum(amplitude)
+def generate_poincare_plot(ax, amplitude, t_max=2500, pendulumtype=PerturbedPendulum):
+    """
+    Generate a poincare plot for the given pendulum type
+    """
+    pendulum = build_pendulum(amplitude, pendulumtype)
+
     initial_states = generate_random_pairs(100, 0, 2 * np.pi, -1.5, 1.5)
     for s in initial_states:
         pc = pendulum.poincare(s, t_max)
         ax.plot(angle_to_2pi(pc[0]), pc[1], "k,", alpha=0.5)  # type: ignore
-
