@@ -2,7 +2,7 @@
 this module contains functionality for studying the pendulum dynamics
 """
 import numpy as np
-from ._multiple_wave_transport import PerturbedPendulum, UnperturbedPendulum
+from ._multiple_wave_transport import PerturbedPendulum, UnperturbedPendulum, BoundaryType
 from .losses import LossTimeResult
 from multiple_wave_transport.math import generate_random_pairs
 from scipy.special import ellipk
@@ -51,13 +51,14 @@ def calculate_loss_times(
     t_max: float,
     amplitude: float,
     n_particles: int,
+    boundary_type: BoundaryType = BoundaryType.X,
 ):
     """
     Calculate the loss times for a set of initial conditions
     """
     pert = PerturbedPendulum(amplitude)
     init_trapped_states = generate_random_init_trapped_states(n_particles)
-    loss_times = np.array([pert.get_loss_time(s, t_max) for s in init_trapped_states])
+    loss_times = np.array([pert.get_loss_time(s, t_max, boundary_type) for s in init_trapped_states])
 
     options = dict(
         t_max=t_max,

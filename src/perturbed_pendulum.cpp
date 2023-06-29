@@ -95,14 +95,18 @@ OrbitPoints PerturbedPendulum::poincare(const State &s, double t_max) const noex
   return out;
 }
 
-bool is_outside(const State &s) {
+bool is_outside_X(const State &s) {
   using namespace boost::math::double_constants;
   return (s[0] > two_pi) || (s[0]< 0.0);
 }
 
+bool is_outside_P(const State &s) {
+  return (s[1] > 2.01) || (s[1]< -2.01);
+}
+
 
 template<typename DenseStepper>
-double track_down_cross_time(DenseStepper &stepper) {
+double track_down_cross_time(DenseStepper &stepper, bool(*is_outside)(const State &)) {
   // improve accuracy of the crossing time by bisection method
   // It is assumed that the event is detected at the last step taken by the stepper
 
@@ -125,7 +129,19 @@ double track_down_cross_time(DenseStepper &stepper) {
   return t;
 }
 
-double PerturbedPendulum::get_loss_time(const State &s_init, double t_max) const noexcept {
+auto get_boundary_check_function(WP::BoundaryType boundarytype) {
+  switch(boundarytype) {
+    case WP::BoundaryType::X:
+      return is_outside_X;
+    case WP::BoundaryType::P:
+      return is_outside_P;
+    default:
+      throw std::runtime_error("Unknown boundary type");
+  }
+}
+
+double PerturbedPendulum::get_loss_time(const State &s_init, double t_max, WP::BoundaryType boundarytype) const noexcept {
+  auto is_outside = get_boundary_check_function(boundarytype);
 
   using namespace boost::numeric::odeint;
 
@@ -134,7 +150,7 @@ double PerturbedPendulum::get_loss_time(const State &s_init, double t_max) const
   const double rtol = 1.0e-10;
   const double dt_init = 1.0e-3;
 
-  if (is_outside(s_init)) {
+  if (is_outside_X(s_init)) {
     return 0.0;
   }
 
@@ -151,7 +167,7 @@ double PerturbedPendulum::get_loss_time(const State &s_init, double t_max) const
   for (auto it = begin; it != end; ++it) {
     const auto &s = it->first;
     if (is_outside(s)) {
-      return track_down_cross_time(stepper);
+      return track_down_cross_time(stepper, is_outside);
     }
   }
   return t_max;

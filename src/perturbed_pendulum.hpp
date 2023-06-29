@@ -4,6 +4,8 @@
 
 namespace WP {
 
+enum class BoundaryType {X, P};
+
 class UnperturbedPendulum {
 public:
   void operator()(const State &s, State &dsdt, double t) const noexcept;
@@ -21,7 +23,7 @@ public:
   void operator()(const State &s, State &dsdt, double t) const noexcept;
   OrbitPoints repeat_state(const State &s) const noexcept;
   OrbitPoints poincare(const State &s, double t_max) const noexcept;
-  double get_loss_time(const State &s_init, double t_max) const noexcept;
+  double get_loss_time(const State &s_init, double t_max, BoundaryType b=BoundaryType::X) const noexcept;
   /**
    * @brief      Calculate the time it takes for a single state to reach the
    * "loss region" p>p_max or t>t_max.

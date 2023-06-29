@@ -1,7 +1,16 @@
-from calculate_and_save_loss_times import calculate_and_save_loss_times
+from calculate_and_save_loss_times import calculate_and_save_loss_times, BoundaryType
+from pathlib import Path
+
+THIS_FOLDER = Path(__file__).parent
+DATA_FOLDER = THIS_FOLDER / "data_p_boundary"
+
+# make sure the data folder exists
+DATA_FOLDER.mkdir(parents=True, exist_ok=True)
 
 amplitudes = [
-    0.48,
+    1.1,
+    1.2,
+    2.5,
 ]
 
 opts = dict(
@@ -11,4 +20,4 @@ opts = dict(
 
 
 for amplitude in amplitudes:
-    calculate_and_save_loss_times(amplitude=amplitude, **opts)
+    calculate_and_save_loss_times(amplitude=amplitude, **opts, data_folder=DATA_FOLDER, boundary_type=BoundaryType.P)
