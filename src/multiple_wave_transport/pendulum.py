@@ -55,12 +55,10 @@ def generate_random_init_trapped_states(n):
 
 
 def build_pendulum(amplitude, pendulumtype):
-    if pendulumtype == PerturbedPendulum:
-        return PerturbedPendulum(amplitude)
-    elif pendulumtype == PerturbedPendulumWithLowFrequency:
-        return PerturbedPendulumWithLowFrequency(amplitude[0], amplitude[1])
-    else:
-        raise ValueError("Invalid pendulum type")
+    try:
+        return pendulumtype(*amplitude)
+    except TypeError:
+        return pendulumtype(amplitude)
 
 
 def calculate_loss_times(
