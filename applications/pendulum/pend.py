@@ -4,6 +4,7 @@ import numpy as np
 from multiple_wave_transport._multiple_wave_transport import (
     PerturbedPendulum,
     PerturbedPendulumWithLowFrequency,
+    PerturbedPendulumOnlyLowFrequency,
     UnperturbedPendulum,
 )
 from multiple_wave_transport.math import angle_to_2pi, generate_random_pairs
