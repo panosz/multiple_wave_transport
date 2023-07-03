@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.ndimage import uniform_filter1d
 from scipy.optimize import curve_fit
+from scipy.signal import spectrogram
 
 from multiple_wave_transport.losses import (
     LossTimeResult,
@@ -18,6 +19,8 @@ from multiple_wave_transport.pendulum import (
 )
 
 THIS_FOLDER = Path(__file__).parent
+
+BASE_WAVE_FREQ = 1 / (4 * np.pi)
 
 
 def exp_decay(t, A, alpha):
@@ -40,6 +43,24 @@ def fit_exp_decay(times, current, guess):
     return popt, errors
 
 
+def generate_spectrogram(ax, y, t, window_size=1024):
+    fs = 1 / (t[1] - t[0])
+    freqs, times, Sxx = spectrogram(
+        y,
+        fs=fs,
+        window="hann",
+        nperseg=window_size,
+    )
+
+    Sxx = np.abs(Sxx)
+
+    ax.pcolormesh(times, freqs / BASE_WAVE_FREQ, np.log10(Sxx), shading="gouraud")
+    ax.set_ylabel("Frequency [f0]")
+    ax.set_xlabel("Time [s]")
+    ax.set_ylim(0, 8)
+    return ax
+
+
 def process_and_plot_result(filename, t_poincare, pendulumtype=PerturbedPendulum):
     """
     Process the result of a loss time calculation and plot the results
@@ -57,7 +78,7 @@ def process_and_plot_result(filename, t_poincare, pendulumtype=PerturbedPendulum
     A0 = actual_loss_times.size
 
     # Fit the current to an exponential decay after taking a rolling average
-    averaged_current = uniform_filter1d(current, size=505)
+    averaged_current = uniform_filter1d(current, size=2505)
     popt, errors = fit_exp_decay(
         times[times > 200], averaged_current[times > 200], guess=(A0, 0.001)
     )
@@ -81,8 +102,9 @@ def process_and_plot_result(filename, t_poincare, pendulumtype=PerturbedPendulum
     fig = plt.figure(figsize=(15, 6), constrained_layout=True)
     gs = fig.add_gridspec(2, 2)
 
-    ax_poincare = fig.add_subplot(gs[:, 0])
+    ax_poincare = fig.add_subplot(gs[0, 0])
     ax_current = fig.add_subplot(gs[0, 1])
+    ax_spectrogram = fig.add_subplot(gs[1, 0])
     ax_spectrum = fig.add_subplot(gs[1, 1])
 
     ax_current.plot(times, current, alpha=0.8, lw=0.5)
@@ -107,15 +129,20 @@ def process_and_plot_result(filename, t_poincare, pendulumtype=PerturbedPendulum
     mask = times > 200
     frequencies, spectrum = get_spectrum(current[mask], times[mask])
 
-    base_wave_freq = 1 / (4 * np.pi)
-    frequencies = frequencies / base_wave_freq
+    frequencies = frequencies / BASE_WAVE_FREQ
 
     ax_spectrum.plot(frequencies, spectrum / spectrum.max())
     ax_spectrum.set_xlim(-0.1, 8)
     ax_spectrum.set_xlabel("frequency (f/f0)")
     ax_spectrum.set_ylabel("spectrum (a.u.)")
 
-    generate_poincare_plot(ax_poincare, options["amplitude"], t_max=t_poincare, pendulumtype=pendulumtype)
+    ax_spectrogram = generate_spectrogram(
+        ax_spectrogram, current, times, window_size=1024
+    )
+
+    generate_poincare_plot(
+        ax_poincare, options["amplitude"], t_max=t_poincare, pendulumtype=pendulumtype
+    )
     ax_poincare.set_xlim(0, 2 * np.pi)
     ax_poincare.set_ylim(-2.5, 2.5)
     ax_poincare.set_xlabel("$x$")
@@ -125,9 +152,11 @@ def process_and_plot_result(filename, t_poincare, pendulumtype=PerturbedPendulum
 
 
 if __name__ == "__main__":
-    filename = THIS_FOLDER / "data_w_low_freq" / "loss_times_0.50_0.10.json"
+    filename = THIS_FOLDER / "data_w_low_freq" / "loss_times_0.90_0.90.json"
 
-    _, estimated_parameters, fig = process_and_plot_result(filename, t_poincare=25000, pendulumtype=PerturbedPendulumWithLowFrequency)
+    _, estimated_parameters, fig = process_and_plot_result(
+        filename, t_poincare=250, pendulumtype=PerturbedPendulumWithLowFrequency
+    )
 
     print(estimated_parameters)
 
