@@ -46,7 +46,6 @@ if __name__ == "__main__":
         ax,
         amplitude=options["amplitude"],
         t_max=options["t_max"],
-        pendulumtype=PerturbedPendulumWithLowFrequency,
     )
 
     plt.show()

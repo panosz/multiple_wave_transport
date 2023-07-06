@@ -30,5 +30,4 @@ for amplitude in amplitudes:
         **opts,
         data_folder=DATA_FOLDER,
         boundary_type=BoundaryType.X,
-        pendulumtype=PerturbedPendulumWithLowFrequency,
     )

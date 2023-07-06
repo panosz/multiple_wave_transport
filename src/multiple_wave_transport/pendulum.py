@@ -54,11 +54,11 @@ def generate_random_init_trapped_states(n):
     return trapped_states
 
 
-def build_pendulum(amplitude, pendulumtype):
+def build_pendulum(amplitude):
     try:
-        return pendulumtype(*amplitude)
+        return PerturbedPendulumWithLowFrequency(*amplitude)
     except TypeError:
-        return pendulumtype(amplitude)
+        return PerturbedPendulum(amplitude)
 
 
 def calculate_loss_times(
@@ -66,12 +66,11 @@ def calculate_loss_times(
     amplitude: float,
     n_particles: int,
     boundary_type: BoundaryType = BoundaryType.X,
-    pendulumtype=PerturbedPendulum,
 ):
     """
     Calculate the loss times for a set of initial conditions
     """
-    pend = build_pendulum(amplitude, pendulumtype)
+    pend = build_pendulum(amplitude)
     init_trapped_states = generate_random_init_trapped_states(n_particles)
     loss_times = np.array(
         [pend.get_loss_time(s, t_max, boundary_type) for s in init_trapped_states]
@@ -85,11 +84,11 @@ def calculate_loss_times(
     return LossTimeResult(init_trapped_states, loss_times, options)
 
 
-def generate_poincare_plot(ax, amplitude, t_max=2500, pendulumtype=PerturbedPendulum):
+def generate_poincare_plot(ax, amplitude, t_max=2500):
     """
-    Generate a poincare plot for the given pendulum type
+    Generate a poincare plot 
     """
-    pendulum = build_pendulum(amplitude, pendulumtype)
+    pendulum = build_pendulum(amplitude)
 
     initial_states = generate_random_pairs(100, 0, 2 * np.pi, -1.5, 1.5)
     for s in initial_states:

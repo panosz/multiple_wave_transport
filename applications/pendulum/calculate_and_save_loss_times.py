@@ -37,14 +37,12 @@ def calculate_and_save_loss_times(
     n_particles: int,
     data_folder: Path | str = DATA_FOLDER,
     boundary_type: BoundaryType = BoundaryType.X,
-    pendulumtype: type[PerturbedPendulum]
-    | type[PerturbedPendulumWithLowFrequency] = PerturbedPendulum,
 ):
     """
     Calculate the loss times and save them to a file
     """
     print(f"Calculating loss times for amplitude {amplitude}")
-    result = calculate_loss_times(t_max, amplitude, n_particles, boundary_type, pendulumtype)
+    result = calculate_loss_times(t_max, amplitude, n_particles, boundary_type)
     filename = get_filename(amplitude, pendulumtype)
     with open(Path(data_folder) / filename, "w") as f:
         f.write(result.to_json())
