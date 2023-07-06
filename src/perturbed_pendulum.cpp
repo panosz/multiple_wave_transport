@@ -218,37 +218,4 @@ double PerturbedPendulumWithLowFrequency::get_loss_time(
   return get_loss_time_impl(*this, s_init, t_max, boundarytype);
 }
 
-void PerturbedPendulumOnlyLowFrequency::operator()(const State &s, State &dsdt,
-                                                   double t) const noexcept {
-  using namespace boost::math::double_constants;
-  const auto &x = s[0];
-  const auto &p = s[1];
-
-  dsdt[0] = p;
-  dsdt[1] = sin(x) - epsilon * cos(x - 0.05 * t);
-}
-
-State PerturbedPendulumOnlyLowFrequency::call(const State &s,
-                                              double t) const noexcept {
-  State dsdt{2, 3};
-  this->operator()(s, dsdt, t);
-  return dsdt;
-}
-
-OrbitPoints
-PerturbedPendulumOnlyLowFrequency::poincare(const State &s,
-                                            double t_max) const noexcept {
-
-  using namespace boost::math::double_constants;
-  constexpr double delta_t = 20 * two_pi;
-
-  return poincare_impl(*this, s, t_max, delta_t);
-}
-
-double PerturbedPendulumOnlyLowFrequency::get_loss_time(
-    const State &s_init, double t_max,
-    WP::BoundaryType boundarytype) const noexcept {
-  return get_loss_time_impl(*this, s_init, t_max, boundarytype);
-}
-
 } // namespace WP
