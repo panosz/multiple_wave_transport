@@ -22,7 +22,7 @@ public:
   static constexpr double poincare_dt = 2 * boost::math::double_constants::two_pi;
   explicit PerturbedPendulum(double _epsilon) noexcept : epsilon(_epsilon){};
   State call(const State &s, double t) const noexcept;
-  void operator()(const State &s, State &dsdt, double t) const noexcept;
+  inline void operator()(const State &s, State &dsdt, double t) const noexcept;
   OrbitPoints repeat_state(const State &s) const noexcept;
   OrbitPoints poincare(const State &s, double t_max) const noexcept;
   double get_loss_time(const State &s_init, double t_max, BoundaryType b=BoundaryType::X) const noexcept;
@@ -52,7 +52,7 @@ public:
   static constexpr double poincare_dt = 20 * boost::math::double_constants::two_pi;
   PerturbedPendulumWithLowFrequency(double _epsilon_high, double _epsilon_low) noexcept : epsilon_high(_epsilon_high), epsilon_low(_epsilon_low){};
   State call(const State &s, double t) const noexcept;
-  void operator()(const State &s, State &dsdt, double t) const noexcept;
+  inline void operator()(const State &s, State &dsdt, double t) const noexcept;
   OrbitPoints repeat_state(const State &s) const noexcept;
   OrbitPoints poincare(const State &s, double t_max) const noexcept;
   double get_loss_time(const State &s_init, double t_max, BoundaryType b=BoundaryType::X) const noexcept;

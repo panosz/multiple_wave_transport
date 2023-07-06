@@ -52,6 +52,7 @@ public:
   PushBackStateObesrver(WP::collections::OrbitStdVector &states)
       : m_states(states) {}
 
+  void reserve(size_t n) { m_states.reserve(n); }
   void operator()(const WP::State &x, double /*t*/) { m_states.push_back(x); }
 };
 
@@ -64,15 +65,18 @@ OrbitPoints poincare_impl(const System &sys, const State &s, double t_max,
   typedef boost::numeric::odeint::runge_kutta_dopri5<State> stepper_type;
   using namespace boost::math::double_constants;
 
-  const double atol = 1.0e-10;
-  const double rtol = 1.0e-10;
+  const double atol = 1.0e-9;
+  const double rtol = 1.0e-9;
 
-  auto stepper = make_dense_output(atol, rtol, stepper_type());
+  auto stepper = make_controlled(atol, rtol, stepper_type());
 
   State s_cur = s;
 
+  auto observer = PushBackStateObesrver(out);
+  observer.reserve(static_cast<size_t>(std::ceil(t_max / delta_t)));
+
   integrate_const(stepper, sys, s_cur, 0.0, t_max, delta_t,
-                  PushBackStateObesrver(out));
+                  observer);
   return out;
 }
 
@@ -157,7 +161,7 @@ double get_loss_time_impl(const System &sys, const State &s_init, double t_max,
   return t_max;
 }
 
-void PerturbedPendulum::operator()(const State &s, State &dsdt,
+inline void PerturbedPendulum::operator()(const State &s, State &dsdt,
                                    double t) const noexcept {
   using namespace boost::math::double_constants;
   const auto &x = s[0];
@@ -185,7 +189,7 @@ PerturbedPendulum::get_loss_time(const State &s_init, double t_max,
   return get_loss_time_impl(*this, s_init, t_max, boundarytype);
 }
 
-void PerturbedPendulumWithLowFrequency::operator()(const State &s, State &dsdt,
+inline void PerturbedPendulumWithLowFrequency::operator()(const State &s, State &dsdt,
                                                    double t) const noexcept {
   using namespace boost::math::double_constants;
   const auto &x = s[0];

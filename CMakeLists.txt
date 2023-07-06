@@ -57,7 +57,8 @@ set(COMPILE_OPTS
         -Wconversion -Wsign-conversion -Wmisleading-indentation
         -Wduplicated-cond -Wduplicated-branches -Wlogical-op
         -Wnull-dereference -Wuseless-cast -Wdouble-promotion
-        -Wformat=2 -static-libstdc++
+        -Wformat=2 
+        -static-libstdc++
         -fPIC
         # -frounding-math
         $<$<CONFIG:Debug>:
@@ -65,7 +66,7 @@ set(COMPILE_OPTS
         >
         $<$<CONFIG:Release>:
         -O3
-        # -march=native
+        -march=native
         >
         )
 
