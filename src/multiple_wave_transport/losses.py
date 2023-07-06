@@ -3,7 +3,7 @@ This module contains functionality related to loss times
 """
 import json
 from dataclasses import asdict, dataclass
-from typing import Tuple
+from typing import Tuple, Union
 
 import numpy as np
 
@@ -31,7 +31,7 @@ class LossTimeResult:
     Result of the loss time calculation
     """
 
-    initial_states: list[Tuple[float, float]] | np.ndarray
+    initial_states: Union[list[Tuple[float, float]], np.ndarray]
     loss_times: np.ndarray
     options: dict
 

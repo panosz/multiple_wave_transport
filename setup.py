@@ -24,6 +24,6 @@ setup(
     cmake_install_dir="src/multiple_wave_transport",
     include_package_data=True,
     extras_require={"test": ["pytest"]},
-    python_requires=">=3.10",
+    python_requires=">=3.9",
     cmake_with_sdist=True,
 )
