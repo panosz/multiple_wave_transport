@@ -14,9 +14,9 @@ DATA_FOLDER = THIS_FOLDER / "data_w_low_freq"
 DATA_FOLDER.mkdir(parents=True, exist_ok=True)
 
 amplitudes = [
-    (1.0, 0.1),
-    (1.4, 0.1),
-    (2.4, 0.1),
+    (1.0, 0.5),
+    (1.4, 0.5),
+    (2.4, 0.5),
 ]
 
 opts = dict(
