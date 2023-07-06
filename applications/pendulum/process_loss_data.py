@@ -61,7 +61,9 @@ def generate_spectrogram(ax, y, t, window_size=1024):
     return ax
 
 
-def process_and_plot_result(filename, t_poincare, pendulumtype=PerturbedPendulum):
+def process_and_plot_result(
+    filename, t_poincare, pendulumtype=PerturbedPendulum, n_average_window=2505
+):
     """
     Process the result of a loss time calculation and plot the results
     """
@@ -78,26 +80,42 @@ def process_and_plot_result(filename, t_poincare, pendulumtype=PerturbedPendulum
     A0 = actual_loss_times.size
 
     # Fit the current to an exponential decay after taking a rolling average
-    averaged_current = uniform_filter1d(current, size=2505)
-    popt, errors = fit_exp_decay(
-        times[times > 200], averaged_current[times > 200], guess=(A0, 0.001)
-    )
+    averaged_current = uniform_filter1d(current, size=n_average_window)
+    try:
+        popt, errors = fit_exp_decay(
+            times[times > 200], averaged_current[times > 200], guess=(A0, 0.0001)
+        )
 
-    print("transient parameters:")
-    popt_transient, errors_transient = fit_exp_decay(
-        times[times < 200], averaged_current[times < 200], guess=(A0, 0.001)
-    )
+        print("transient parameters:")
+        popt_transient, errors_transient = fit_exp_decay(
+            times[times < 200], averaged_current[times < 200], guess=(A0, 0.1)
+        )
 
-    estimated_parameters = {
-        "A_steady": popt[0],
-        "alpha_steady": popt[1],
-        "A_err_steady": errors[0],
-        "alpha_err_steady": errors[1],
-        "A_transient": popt_transient[0],
-        "alpha_transient": popt_transient[1],
-        "A_err_transient": errors_transient[0],
-        "alpha_err_transient": errors_transient[1],
-    }
+        estimated_parameters = {
+            "A_steady": popt[0],
+            "alpha_steady": popt[1],
+            "A_err_steady": errors[0],
+            "alpha_err_steady": errors[1],
+            "A_transient": popt_transient[0],
+            "alpha_transient": popt_transient[1],
+            "A_err_transient": errors_transient[0],
+            "alpha_err_transient": errors_transient[1],
+        }
+
+    except RuntimeError:
+        popt = (np.nan, np.nan)
+        popt_transient = (np.nan, np.nan)
+        print("fit failed")
+        estimated_parameters = {
+            "A_steady": np.nan,
+            "alpha_steady": np.nan,
+            "A_err_steady": np.nan,
+            "alpha_err_steady": np.nan,
+            "A_transient": np.nan,
+            "alpha_transient": np.nan,
+            "A_err_transient": np.nan,
+            "alpha_err_transient": np.nan,
+        }
 
     fig = plt.figure(figsize=(15, 6), constrained_layout=True)
     gs = fig.add_gridspec(2, 2)
@@ -122,7 +140,8 @@ def process_and_plot_result(filename, t_poincare, pendulumtype=PerturbedPendulum
     axins.plot(
         times[mask], exp_decay(times[mask], *popt_transient), color="y", lw=2, alpha=0.8
     )
-    axins.set_ylim(-0.1, exp_decay(times[mask], *popt).max() * 1.1)
+    if not np.isnan(popt[0]):
+        axins.set_ylim(-0.1, exp_decay(times[mask], *popt).max() * 1.1)
     axins.plot(times[mask], averaged_current[mask], color="g", lw=2, alpha=0.8)
     ax_current.indicate_inset_zoom(axins, edgecolor="black")
 
@@ -131,7 +150,14 @@ def process_and_plot_result(filename, t_poincare, pendulumtype=PerturbedPendulum
 
     frequencies = frequencies / BASE_WAVE_FREQ
 
+    S0 = spectrum[0]
+    S1 = np.interp(1, frequencies, spectrum)
+
+    estimated_parameters["S0"] = S0
+    estimated_parameters["S1"] = S1
+
     ax_spectrum.plot(frequencies, spectrum / spectrum.max())
+    ax_spectrum.plot([0, 1], [S0 / spectrum.max(), S1 / spectrum.max()], "ro")
     ax_spectrum.set_xlim(-0.1, 8)
     ax_spectrum.set_xlabel("frequency (f/f0)")
     ax_spectrum.set_ylabel("spectrum (a.u.)")
@@ -155,7 +181,10 @@ if __name__ == "__main__":
     filename = THIS_FOLDER / "data_w_low_freq" / "loss_times_0.90_0.90.json"
 
     _, estimated_parameters, fig = process_and_plot_result(
-        filename, t_poincare=250, pendulumtype=PerturbedPendulumWithLowFrequency
+        filename,
+        t_poincare=250,
+        pendulumtype=PerturbedPendulumWithLowFrequency,
+        n_average_window=1500,
     )
 
     print(estimated_parameters)
