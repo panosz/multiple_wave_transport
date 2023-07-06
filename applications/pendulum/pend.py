@@ -1,7 +1,9 @@
-import matplotlib.pyplot as plt
+import time
 from dataclasses import dataclass
-import numpy as np
 from typing import Union
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 from multiple_wave_transport._multiple_wave_transport import (
     PerturbedPendulum,
@@ -92,22 +94,53 @@ def get_travelling_distances(amplitude, x_min, x_max, p_min, p_max, tmax, n_part
     )
 
 
+def save_travelling_distances(
+    amplitude, x_min, x_max, p_min, p_max, tmax, n_particles, fname=None,
+    datafolder=None
+):
+    if fname is None:
+        fname = f"distances{amplitude}.json".replace(" ", "_").replace(",", "_")
+
+    if datafolder is not None:
+        fname = datafolder / fname
+
+    print(f"Computing travelling distances for {amplitude}")
+
+    res = get_travelling_distances(
+        amplitude, x_min, x_max, p_min, p_max, tmax, n_particles
+    )
+
+    print(f"Saving to {fname}")
+
+    with open(fname, "w") as f:
+        f.write(res.to_json())
+
+    return res
+
+
 if __name__ == "__main__":
-    t_max = 1500
+    t_max = 120000
     amplitude = (0.6, 0.6)
-    n_particles = 100
+    n_particles = 1000
 
-    pendulum = build_pendulum(amplitude)
-    initial_states = generate_random_pairs(n_particles, 0, 2 * np.pi, -0.8, 0.8)
+    # time this function in miliseconds
+    time_start = time.time()
+    res = get_travelling_distances(
+        amplitude, 0, 2 * np.pi, -0.8, 0.8, t_max, n_particles
+    )
+    delta_time = time.time() - time_start
+    print(f"Time elapsed in second: {delta_time}")
 
-    distances = [_get_travelling_distance(pendulum, s0, t_max) for s0 in initial_states]
+    fname = f"distances{res.amplitude}.json".replace(" ", "_").replace(",", "_")
 
-    distances = np.column_stack(distances)
+    with open(fname, "w") as f:
+        f.write(res.to_json())
 
-    mean_distances = np.mean(distances, axis=1)
+    mean_distances = np.mean(res.distances, axis=1)
 
+    pendulum = build_pendulum(res.amplitude)
     t = np.arange(0, t_max, pendulum.poincare_dt)
 
-    plt.plot(t, mean_distances / t)
+    plt.plot(t[1:], mean_distances[1:] / t[1:])
 
     plt.show()
