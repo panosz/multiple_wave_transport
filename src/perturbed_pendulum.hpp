@@ -1,6 +1,7 @@
 #ifndef PERTURBED_PENDULUM_AU7HOOCA
 #define PERTURBED_PENDULUM_AU7HOOCA
 #include "type_definitions.hpp"
+#include <boost/math/constants/constants.hpp>
 
 namespace WP {
 
@@ -18,6 +19,7 @@ class PerturbedPendulum {
   double epsilon;
 
 public:
+  static constexpr double poincare_dt = 2 * boost::math::double_constants::two_pi;
   explicit PerturbedPendulum(double _epsilon) noexcept : epsilon(_epsilon){};
   State call(const State &s, double t) const noexcept;
   void operator()(const State &s, State &dsdt, double t) const noexcept;
@@ -47,6 +49,7 @@ class PerturbedPendulumWithLowFrequency {
   double epsilon_low;
 
 public:
+  static constexpr double poincare_dt = 20 * boost::math::double_constants::two_pi;
   PerturbedPendulumWithLowFrequency(double _epsilon_high, double _epsilon_low) noexcept : epsilon_high(_epsilon_high), epsilon_low(_epsilon_low){};
   State call(const State &s, double t) const noexcept;
   void operator()(const State &s, State &dsdt, double t) const noexcept;

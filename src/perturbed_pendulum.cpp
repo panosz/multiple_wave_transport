@@ -176,10 +176,7 @@ State PerturbedPendulum::call(const State &s, double t) const noexcept {
 OrbitPoints PerturbedPendulum::poincare(const State &s,
                                         double t_max) const noexcept {
 
-  using namespace boost::math::double_constants;
-  constexpr double delta_t = 2 * two_pi;
-
-  return poincare_impl(*this, s, t_max, delta_t);
+  return poincare_impl(*this, s, t_max, poincare_dt);
 }
 
 double
@@ -212,9 +209,7 @@ OrbitPoints
 PerturbedPendulumWithLowFrequency::poincare(const State &s,
                                             double t_max) const noexcept {
 
-  using namespace boost::math::double_constants;
-  constexpr double delta_t = 20 * two_pi;
-  return poincare_impl(*this, s, t_max, delta_t);
+  return poincare_impl(*this, s, t_max, poincare_dt);
 }
 
 double PerturbedPendulumWithLowFrequency::get_loss_time(

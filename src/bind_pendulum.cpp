@@ -21,7 +21,9 @@ void bind_pendulum(py::module_ &m) {
            py::arg("t_max"))
       .def("get_loss_time", &PerturbedPendulum::get_loss_time,
            py::arg("s_init"), py::arg("t_max"),
-           py::arg("boundary_type") = WP::BoundaryType::X);
+           py::arg("boundary_type") = WP::BoundaryType::X)
+      .def_readonly_static("poincare_dt", &PerturbedPendulum::poincare_dt)
+  ;
 
   py::class_<PerturbedPendulumWithLowFrequency>(
       m, "PerturbedPendulumWithLowFrequency")
@@ -33,13 +35,16 @@ void bind_pendulum(py::module_ &m) {
            py::arg("s"), py::arg("t_max"))
       .def("get_loss_time", &PerturbedPendulumWithLowFrequency::get_loss_time,
            py::arg("s_init"), py::arg("t_max"),
-           py::arg("boundary_type") = WP::BoundaryType::X);
+           py::arg("boundary_type") = WP::BoundaryType::X)
+      .def_readonly_static("poincare_dt", &PerturbedPendulumWithLowFrequency::poincare_dt);
 
-  py::class_<PerturbedPendulumOnlyLowFrequency>(m, "PerturbedPendulumOnlyLowFrequency")
+  py::class_<PerturbedPendulumOnlyLowFrequency>(
+      m, "PerturbedPendulumOnlyLowFrequency")
       .def(py::init<double>(), py::arg("epsilon"))
-      .def("__call__", &PerturbedPendulumOnlyLowFrequency::call, py::arg("s"), py::arg("t"))
-      .def("poincare", &PerturbedPendulumOnlyLowFrequency::poincare, py::arg("s"),
-           py::arg("t_max"))
+      .def("__call__", &PerturbedPendulumOnlyLowFrequency::call, py::arg("s"),
+           py::arg("t"))
+      .def("poincare", &PerturbedPendulumOnlyLowFrequency::poincare,
+           py::arg("s"), py::arg("t_max"))
       .def("get_loss_time", &PerturbedPendulumOnlyLowFrequency::get_loss_time,
            py::arg("s_init"), py::arg("t_max"),
            py::arg("boundary_type") = WP::BoundaryType::X);
@@ -50,4 +55,3 @@ void bind_pendulum(py::module_ &m) {
            py::arg("t"))
       .def("energy", &UnperturbedPendulum::energy, py::arg("s"));
 }
-
