@@ -86,7 +86,7 @@ def get_travelling_distances(amplitude, E_min, E_max, tmax, n_particles):
 
 
 def save_travelling_distances(
-    amplitude, x_min, x_max, p_min, p_max, tmax, n_particles, fname=None,
+    amplitude, E_min, E_max, tmax, n_particles, fname=None,
     datafolder=None
 ):
     if fname is None:
@@ -98,7 +98,7 @@ def save_travelling_distances(
     print(f"Computing travelling distances for {amplitude}")
 
     res = get_travelling_distances(
-        amplitude, x_min, x_max, p_min, p_max, tmax, n_particles
+        amplitude, E_min=E_min, E_max=E_max, tmax=tmax, n_particles=n_particles
     )
 
     print(f"Saving to {fname}")
