@@ -11,8 +11,7 @@ from multiple_wave_transport._multiple_wave_transport import (
     UnperturbedPendulum,
 )
 from multiple_wave_transport.losses import to_json
-from multiple_wave_transport.math import angle_to_2pi, generate_random_pairs
-from multiple_wave_transport.pendulum import build_pendulum
+from multiple_wave_transport.pendulum import build_pendulum, generate_random_init_trapped_states
 
 
 def _get_travelling_distance(pendulum, s, t_max):
@@ -36,10 +35,8 @@ class ResultOfTravellingDistances:
     """
 
     amplitude: Union[float, tuple[float, float]]
-    x_min: float
-    x_max: float
-    p_min: float
-    p_max: float
+    E_min: float
+    E_max: float
     tmax: float
     n_particles: int
     distances: np.ndarray
@@ -49,7 +46,7 @@ class ResultOfTravellingDistances:
 
 
 # Add type hints to the function below
-def get_travelling_distances(amplitude, x_min, x_max, p_min, p_max, tmax, n_particles):
+def get_travelling_distances(amplitude, E_min, E_max, tmax, n_particles):
     """
     returns the distance from the initial state s0 until time tmax
     at snapshots equally spaced in time with time step equal to pendulum.poincare_dt
@@ -63,14 +60,10 @@ def get_travelling_distances(amplitude, x_min, x_max, p_min, p_max, tmax, n_part
     -----------
     amplitude: float or (float, float)
         amplitude of the pendulum
-    x_min: float
-        minimum value of the initial angle
-    x_max: float
-        maximum value of the initial angle
-    p_min: float
-        minimum value of the initial momentum
-    p_max: float
-        maximum value of the initial momentum
+    E_min: float
+        minimum energy
+    E_max: float
+        maximum energy
     tmax: float
         maximum time
     n_particles: int
@@ -78,16 +71,14 @@ def get_travelling_distances(amplitude, x_min, x_max, p_min, p_max, tmax, n_part
     """
 
     pendulum = build_pendulum(amplitude)
-    initial_states = generate_random_pairs(n_particles, x_min, x_max, p_min, p_max)
+    initial_states = generate_random_init_trapped_states(n_particles, E_min, E_max)
     distances = [_get_travelling_distance(pendulum, s0, tmax) for s0 in initial_states]
     distances = np.column_stack(distances)
 
     return ResultOfTravellingDistances(
         amplitude=amplitude,
-        x_min=x_min,
-        x_max=x_max,
-        p_min=p_min,
-        p_max=p_max,
+        E_min=E_min,
+        E_max=E_max,
         tmax=tmax,
         n_particles=n_particles,
         distances=distances,
@@ -126,7 +117,7 @@ if __name__ == "__main__":
     # time this function in miliseconds
     time_start = time.time()
     res = get_travelling_distances(
-        amplitude, 0, 2 * np.pi, -0.8, 0.8, t_max, n_particles
+        amplitude, E_min=-1, E_max=0.8, tmax=t_max, n_particles=n_particles
     )
     delta_time = time.time() - time_start
     print(f"Time elapsed in second: {delta_time}")

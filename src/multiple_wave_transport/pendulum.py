@@ -33,12 +33,12 @@ def unperturbed_period(s):
     return 2 * np.pi / unperturbed_omega(s)
 
 
-def generate_random_init_trapped_states(n):
+def generate_random_init_trapped_states(n, E_min=-1, E_max=1):
     """
     Generate n random initial states that are trapped in the unperturbed potential.
     The states are uniformly distributed in the energy level and the canonical angle of the action angle pair.
     """
-    init_pairs = generate_random_pairs(n, -1, 1, 0, 2 * np.pi)
+    init_pairs = generate_random_pairs(n, E_min, E_max, 0, 2 * np.pi)
 
     trapped_states = []
 

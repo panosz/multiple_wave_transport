@@ -20,10 +20,8 @@ DATA_FOLDER.mkdir(parents=True, exist_ok=True)
 
 if __name__ == "__main__":
     options = dict(
-        x_min=-np.pi,
-        x_max=np.pi,
-        p_min=-0.8,
-        p_max=0.8,
+        E_min=-1.0,
+        E_max=0.85,
         tmax=120000,
         n_particles=1000,
     )
