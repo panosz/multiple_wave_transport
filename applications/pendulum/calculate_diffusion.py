@@ -2,14 +2,8 @@ from multiprocessing import Pool
 from pathlib import Path
 
 import numpy as np
-from pend import save_travelling_distances
+from pend import save_travelling_positions
 
-from multiple_wave_transport._multiple_wave_transport import BoundaryType
-from multiple_wave_transport.pendulum import (
-    PerturbedPendulum,
-    PerturbedPendulumWithLowFrequency,
-    calculate_loss_times,
-)
 
 THIS_FOLDER = Path(__file__).parent
 DATA_FOLDER = THIS_FOLDER / "data_diffusion"
@@ -27,7 +21,7 @@ if __name__ == "__main__":
     )
 
     def calc_and_save(amplitude):
-        save_travelling_distances(amplitude, datafolder=DATA_FOLDER, **options)
+        save_travelling_positions(amplitude, datafolder=DATA_FOLDER, **options)
 
     amplitudes = [
         (0.1, 0.1),
@@ -43,5 +37,7 @@ if __name__ == "__main__":
         (1.1, 1.1),
     ]
 
-    with Pool(len(amplitudes)) as p:
+    n_processes = min(12, len(amplitudes))
+
+    with Pool(n_processes) as p:
         p.map(calc_and_save, amplitudes)
